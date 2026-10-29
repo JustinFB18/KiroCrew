@@ -182,11 +182,16 @@ describe('ChatTitleOverlay', () => {
     expect(enterSplit).toHaveBeenCalledWith('slot-b')
   })
 
-  it('pops the session out to its own window', () => {
+  it('pops the session out to its own window and offers split right and split down', () => {
     const openActivePopout = vi.fn()
-    render(<ChatTitleOverlay {...base({ activePoppedOut: false, openActivePopout, currentSlot: { key: 'slot-a', title: 'Alpha' } as never })} />)
+    const enterSplit = vi.fn()
+    render(<ChatTitleOverlay {...base({ activePoppedOut: false, splitFeatureEnabled: true, openActivePopout, enterSplit, currentSlot: { key: 'slot-a', title: 'Alpha' } as never })} />)
     fireEvent.click(screen.getByRole('button', { name: /pop out/i }))
     expect(openActivePopout).toHaveBeenCalledWith('slot-a', 'Alpha')
+    fireEvent.click(screen.getByRole('button', { name: /enter split view/i }))
+    expect(enterSplit).toHaveBeenCalledWith('slot-a', 'right')
+    fireEvent.click(screen.getByRole('button', { name: /split down/i }))
+    expect(enterSplit).toHaveBeenCalledWith('slot-a', 'down')
   })
 
   it('toggles and jumps to the pinned prompt', () => {

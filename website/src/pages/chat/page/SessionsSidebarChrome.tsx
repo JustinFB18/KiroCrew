@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { KiroCrewAgent } from '../../../components/AgentSelector'
 import type { MobileNavRailRenderer } from '../../../components/MobileNavRailContext'
 import type { HoverIntent } from '../../../hooks/useHoverIntent'
+import type { SplitDir } from '../../../hooks/useSessionGrid'
 import type { VisualViewport } from '../../../hooks/useVisualViewport'
 import type { AppDispatch } from '../../../store'
 import type { ChatSlot, SessionInfo } from '../../../types'
@@ -69,7 +70,7 @@ interface SessionsSidebarChromeProps {
   title: string
   activeIsSplitAnchor: boolean
   editingTitle: boolean
-  enterSplit: (anchor: string | null) => void
+  enterSplit: (anchor: string | null, dir?: SplitDir) => void
   setEditingTitleSlot: Dispatch<SetStateAction<string | null>>
   setSidebarDragging: Dispatch<SetStateAction<boolean>>
   setSidebarWidth: Dispatch<SetStateAction<number>>

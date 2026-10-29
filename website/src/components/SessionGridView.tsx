@@ -6,7 +6,7 @@ import ErrorNotice from './ErrorNotice'
 import { api, ApiError } from '../api/client'
 import SessionGridLayout from './SessionGridLayout'
 import ChatPane, { type PaneLeading } from './ChatPane'
-import { useSessionGrid, type GridLeaf } from '../hooks/useSessionGrid'
+import { useSessionGrid, type GridLeaf, type SplitDir } from '../hooks/useSessionGrid'
 import { emitSlotFocused } from '../hooks/useWebSocket'
 import PaneDim from './PaneDim'
 import { byRecentActivity } from '../utils/slotRecency'
@@ -48,6 +48,7 @@ export default function SessionGridView({
   onClose,
   onCollapse,
   seedSlot,
+  seedDir,
   openSideChat,
   leading,
   onFileOpen,
@@ -60,6 +61,7 @@ export default function SessionGridView({
    *  a prune is not the user opening that chat (#23564). */
   onCollapse: (slot: string, anchorTs?: string, anchorMid?: string, gesture?: boolean) => void
   seedSlot?: string | null
+  seedDir?: SplitDir
   /** Bring the host's Side Chat surface on screen for a pane's slot — what the
    *  selection toolbar's Ask needs. The grid owns no Side Chat of its own
    *  (the host's activity panel does), so without it panes offer Quote only. */
@@ -78,12 +80,12 @@ export default function SessionGridView({
 
   // On entry, restore this anchor's persisted layout if one exists (useSessionGrid
   // loaded it from splitLayoutStore); otherwise seed [current session | placeholder]
-  // in place. Either way ⌘D opens the split of the session you're looking at.
+  // in place along seedDir. Either way ⌘D opens the split of the session you're looking at.
   const seededRef = useRef(false)
   useEffect(() => {
     if (!seededRef.current) {
       seededRef.current = true
-      if (grid.isEmpty) grid.seedFromSession(seedSlot ?? null)
+      if (grid.isEmpty) grid.seedFromSession(seedSlot ?? null, seedDir)
       return
     }
     // Collapse rules — the grid only lives while it's a real (multi-cell) split:
@@ -205,6 +207,7 @@ export default function SessionGridView({
         onCancel={() => grid.closeLeaf(leaf.id)}
         onSplitRight={() => grid.splitLeaf(leaf.id, 'right')}
         onSplitDown={() => grid.splitLeaf(leaf.id, 'down')}
+        onApplyPreset={(rows, cols) => grid.applyPresetGrid(rows, cols)}
         leading={paneLeading}
       />
     )
@@ -237,6 +240,7 @@ function PlaceholderPane({
   onCancel,
   onSplitRight,
   onSplitDown,
+  onApplyPreset,
   leading,
 }: {
   slots: Slot[]
@@ -249,6 +253,7 @@ function PlaceholderPane({
   onCancel: () => void
   onSplitRight: () => void
   onSplitDown: () => void
+  onApplyPreset?: (rows: number, cols: number) => void
   leading?: PaneLeading
 }) {
   const [search, setSearch] = useState('')
@@ -345,6 +350,16 @@ function PlaceholderPane({
         <button onClick={onSplitDown} title={i18nT('components.sessionGridView.split_down')} aria-label={i18nT('components.sessionGridView.split_down')} className={ctrlBtn}>
           <SplitGlyph down />
         </button>
+        {onApplyPreset && (
+          <>
+            <button onClick={() => onApplyPreset(2, 2)} aria-label="2×2" className={`${ctrlBtn} text-[11px] font-mono px-1.5`}>
+              2×2
+            </button>
+            <button onClick={() => onApplyPreset(2, 3)} aria-label="2×3" className={`${ctrlBtn} text-[11px] font-mono px-1.5`}>
+              2×3
+            </button>
+          </>
+        )}
         <button
           onClick={onCancel}
           title={i18nT('components.sessionGridView.close_cell')}

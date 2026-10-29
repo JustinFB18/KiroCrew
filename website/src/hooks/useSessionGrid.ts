@@ -138,19 +138,21 @@ export function useSessionGrid(anchorSlot?: string | null) {
   }, [])
 
   /** Seed the grid when entering split mode. With a current session, "split it
-   *  in place": that session becomes the left pane and a fresh placeholder opens
-   *  beside it (Warp/tmux ⌘D semantics). With no current session, seed a single
-   *  empty placeholder. Called only when nothing was restored from persistence. */
-  const seedFromSession = useCallback((slot: string | null) => {
+   *  in place": that session becomes the first pane and a fresh placeholder opens
+   *  beside or below it (dir 'right' → col, dir 'down' → row). With no current
+   *  session, seed a single empty placeholder. Called only when nothing was
+   *  restored from persistence. */
+  const seedFromSession = useCallback((slot: string | null, dir: SplitDir = 'right') => {
     if (!slot) {
       const leaf = newLeaf()
       setTree(leaf)
       setFocusedId(leaf.id)
       return
     }
+    const axis: 'row' | 'col' = dir === 'down' ? 'row' : 'col'
     const current = newLeaf('session', { slot })
     const blank = newLeaf()
-    setTree({ type: 'split', id: uid(), dir: 'col', children: [current, blank], sizes: [0.5, 0.5] })
+    setTree({ type: 'split', id: uid(), dir: axis, children: [current, blank], sizes: [0.5, 0.5] })
     setFocusedId(blank.id)
   }, [])
 
@@ -198,6 +200,43 @@ export function useSessionGrid(anchorSlot?: string | null) {
   /** Fill / change what a leaf holds (placeholder → session or terminal, etc). */
   const fillLeaf = useCallback((leafId: string, patch: Partial<Omit<GridLeaf, 'type' | 'id'>>) => {
     setTree((cur) => (cur ? replaceLeaf(cur, leafId, (leaf) => ({ ...leaf, ...patch })) : cur))
+  }, [])
+
+  /** Reshape the split tree into a balanced `rows × cols` grid (e.g. 2×2 = 4-in-1,
+   *  2×3 = 6-in-1). Preserves existing non-placeholder leaves in depth-first order
+   *  up to `rows * cols` cells and fills any remaining cells with fresh placeholders. */
+  const applyPresetGrid = useCallback((rows: number, cols: number) => {
+    const r = Math.max(1, Math.floor(rows))
+    const c = Math.max(1, Math.floor(cols))
+    if (r * c < 2) return
+    setTree((cur) => {
+      const existing = leavesOf(cur).filter((l) => l.kind !== 'placeholder')
+      let idx = 0
+      const nextCell = (): GridLeaf => {
+        if (idx < existing.length) return existing[idx++]
+        return newLeaf()
+      }
+      const makeRow = (): GridNode => {
+        if (c === 1) return nextCell()
+        const children = Array.from({ length: c }, nextCell)
+        return {
+          type: 'split',
+          id: uid(),
+          dir: 'col',
+          children,
+          sizes: children.map(() => 1 / c),
+        }
+      }
+      if (r === 1) return makeRow()
+      const rowNodes = Array.from({ length: r }, makeRow)
+      return {
+        type: 'split',
+        id: uid(),
+        dir: 'row',
+        children: rowNodes,
+        sizes: rowNodes.map(() => 1 / r),
+      }
+    })
   }, [])
 
   /** Resize a split: shift `deltaFrac` of the split's extent from child `index+1`
@@ -251,6 +290,7 @@ export function useSessionGrid(anchorSlot?: string | null) {
     splitLeaf,
     closeLeaf,
     fillLeaf,
+    applyPresetGrid,
     resize,
     pruneAgainst,
     setFocused: setFocusedId,

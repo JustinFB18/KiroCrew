@@ -126,6 +126,39 @@ describe('useSessionGrid — seedFromSession', () => {
     expect(result.current.paneCount).toBe(1)
   })
 
+  it('splits the current session down when dir is down', () => {
+    const { result } = renderHook(() => useSessionGrid(null))
+
+    act(() => result.current.seedFromSession('slot-1', 'down'))
+
+    const root = asSplit(result.current.tree)
+    expect(root.dir).toBe('row')
+    expect(root.sizes).toEqual([0.5, 0.5])
+    const [current, blank] = root.children.map(asLeaf)
+    expect(current.kind).toBe('session')
+    expect(current.slot).toBe('slot-1')
+    expect(blank.kind).toBe('placeholder')
+  })
+
+  it('reshapes into a balanced preset grid (2x2 and 2x3) preserving existing sessions', () => {
+    const { result } = renderHook(() => useSessionGrid(null))
+    act(() => result.current.seedFromSession('slot-1'))
+
+    act(() => result.current.applyPresetGrid(2, 2))
+    const grid4 = asSplit(result.current.tree)
+    expect(grid4.dir).toBe('row')
+    expect(grid4.children).toHaveLength(2)
+    expect(result.current.leaves).toHaveLength(4)
+    expect(result.current.leaves[0].slot).toBe('slot-1')
+
+    act(() => result.current.applyPresetGrid(2, 3))
+    const grid6 = asSplit(result.current.tree)
+    expect(grid6.dir).toBe('row')
+    expect(grid6.children).toHaveLength(2)
+    expect(result.current.leaves).toHaveLength(6)
+    expect(result.current.leaves[0].slot).toBe('slot-1')
+  })
+
   it('generates ids without crypto.randomUUID', () => {
     vi.stubGlobal('crypto', {})
     try {

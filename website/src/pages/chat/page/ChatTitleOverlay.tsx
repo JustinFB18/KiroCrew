@@ -1,6 +1,8 @@
 import type { MutableRefObject, Dispatch, SetStateAction } from 'react'
 import { Undo2, ExternalLink, Columns2 } from 'lucide-react'
 import type { SidePanelDock } from '../../../hooks/useSidePanelDock'
+import type { SplitDir } from '../../../hooks/useSessionGrid'
+import { SplitGlyph } from '../../../components/SplitGlyph'
 import type { AppDispatch } from '../../../store'
 import type { ChatSlot } from '../../../types'
 import type { ErrorReport } from '../../../utils/errorReport'
@@ -49,7 +51,7 @@ interface ChatTitleOverlayProps {
   title: string
   activeIsSplitAnchor: boolean
   editingTitle: boolean
-  enterSplit: (anchor: string | null) => void
+  enterSplit: (anchor: string | null, dir?: SplitDir) => void
   setEditingTitleSlot: Dispatch<SetStateAction<string | null>>
   setSidebarPinned: Dispatch<SetStateAction<boolean>>
   sidebarAutoHidden: MutableRefObject<boolean | null>
@@ -204,9 +206,14 @@ export default function ChatTitleOverlay({
           <Columns2 size={13} /> {i18nT('pages.chatPage.in_split')}
         </Clickable>
         ) : (
-          <Clickable className="opacity-40 hover:opacity-100 transition-opacity cursor-pointer pointer-events-auto" onClick={() => enterSplit(activeSlot)} title={i18nT('pages.chatPage.split_view_d')} aria-label={i18nT('pages.chatPage.enter_split_view')}>
-          <Columns2 size={14} />
-        </Clickable>
+          <>
+            <Clickable className="opacity-40 hover:opacity-100 transition-opacity cursor-pointer pointer-events-auto" onClick={() => enterSplit(activeSlot, 'right')} title={i18nT('pages.chatPage.split_view_d')} aria-label={i18nT('pages.chatPage.enter_split_view')}>
+              <Columns2 size={14} />
+            </Clickable>
+            <Clickable className="opacity-40 hover:opacity-100 transition-opacity cursor-pointer pointer-events-auto" onClick={() => enterSplit(activeSlot, 'down')} title={i18nT('components.chatPane.split_down')} aria-label={i18nT('components.chatPane.split_down')}>
+              <SplitGlyph down />
+            </Clickable>
+          </>
         ))}
         </div>
         {/* Header fade — softens content passing up into the opaque title

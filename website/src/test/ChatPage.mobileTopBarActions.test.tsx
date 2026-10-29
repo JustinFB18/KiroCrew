@@ -221,7 +221,10 @@ describe('trailing ⋯ menu', () => {
     expect(p.toggleAct).toHaveBeenCalledTimes(1)
     await openMore()
     fireEvent.click(await screen.findByRole('menuitem', { name: i18nT('pages.chatPage.enter_split_view') }))
-    expect(p.enterSplit).toHaveBeenCalledWith('slot-a')
+    expect(p.enterSplit).toHaveBeenCalledWith('slot-a', 'right')
+    await openMore()
+    fireEvent.click(await screen.findByRole('menuitem', { name: i18nT('components.chatPane.split_down') }))
+    expect(p.enterSplit).toHaveBeenCalledWith('slot-a', 'down')
   })
 
   it('focuses the popped-out window, hides an open activity panel row, and returns to the split', async () => {
@@ -258,6 +261,9 @@ describe('trailing ⋯ menu', () => {
     render(<MobileTopBar {...p} />)
     await openMore()
     fireEvent.click(await screen.findByRole('menuitem', { name: i18nT('pages.chatPage.enter_split_view') }))
-    expect(p.enterSplit).toHaveBeenCalledWith('slot-a')
+    expect(p.enterSplit).toHaveBeenCalledWith('slot-a', 'right')
+    await openMore()
+    fireEvent.click(await screen.findByRole('menuitem', { name: i18nT('components.chatPane.split_down') }))
+    expect(p.enterSplit).toHaveBeenCalledWith('slot-a', 'down')
   })
 })

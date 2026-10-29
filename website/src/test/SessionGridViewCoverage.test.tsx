@@ -888,7 +888,7 @@ describe('SessionGridView — picker controls', () => {
     )
   })
 
-  it('splits the picker cell right and down from its own controls', async () => {
+  it('splits the picker cell right and down from its own controls, and applies 2x2 / 2x3 presets', async () => {
     renderGrid('a')
     const picker = onlyPicker()
 
@@ -897,6 +897,12 @@ describe('SessionGridView — picker controls', () => {
 
     fireEvent.click(within(pickers()[0]).getByLabelText('Split down'))
     await waitFor(() => expect(pickers()).toHaveLength(3))
+
+    fireEvent.click(within(pickers()[0]).getByLabelText('2×2'))
+    await waitFor(() => expect(pickers()).toHaveLength(3)) // 1 session + 3 pickers = 4 cells
+
+    fireEvent.click(within(pickers()[0]).getByLabelText('2×3'))
+    await waitFor(() => expect(pickers()).toHaveLength(5)) // 1 session + 5 pickers = 6 cells
   })
 
   it('focuses the picker cell it is pressed in', async () => {

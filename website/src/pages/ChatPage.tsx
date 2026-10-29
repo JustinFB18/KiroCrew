@@ -758,7 +758,7 @@ export default function ChatPage({ mode, embedded, embedMode, popout, noUrlSync 
   })
   const {
     sidebarPinned, setSidebarPinned, sidebarPinnedRef, sidebarAutoHidden, sidePanelDock, sidePanelDockAnim, sidebarWidth, setSidebarWidth, sidebarDragging, setSidebarDragging, setEditingTitleSlot,
-    editingTitle, enterSplit, splitAnchorForActive, activeIsSplitAnchor,
+    editingTitle, enterSplit, splitDir, splitAnchorForActive, activeIsSplitAnchor,
   } = usePaneLayoutState({
     embedMode, dispatch, slots, activeSlot, autoOpenGitPanel, autoOpenGitPanelKnown, setSplitMode, splitMode, setSplitAnchor, tabsCtl, splitFeatureEnabled, _slotProject, projectGit, projectGitError, embedded, popout, isMobile, sidePanelAlwaysOpen, sidePanelAlwaysOpenKnown, activityOpen,
   })
@@ -1025,6 +1025,7 @@ export default function ChatPage({ mode, embedded, embedMode, popout, noUrlSync 
         {splitMode && splitFeatureEnabled ? (
           <SessionGridView
             seedSlot={splitAnchor ?? activeSlot}
+            seedDir={splitDir}
             openSideChat={connected ? openSideChatForPane : undefined}
             // The single-chat title row is not rendered in split view, so the
             // grid's top-left pane stands in for it: on desktop it clears the

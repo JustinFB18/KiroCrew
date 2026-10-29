@@ -9,6 +9,8 @@ import ErrorNotice, { ErrorNoticeMenuItem } from '../../../components/ErrorNotic
 import { PanelRightSolid } from '../../../components/icons/panels'
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../../../components/ui/dropdown-menu'
 import type { useChatPopouts } from '../../../hooks/useChatPopouts'
+import type { SplitDir } from '../../../hooks/useSessionGrid'
+import { SplitGlyph } from '../../../components/SplitGlyph'
 import { i18nT } from '../../../i18n/t'
 import type { AppDispatch } from '../../../store'
 import { requestSlotReveal } from '../../../store/chatSlice'
@@ -48,7 +50,7 @@ interface MobileTopBarProps {
   toggleAct: () => void
   splitAnchorForActive: string | null
   activeIsSplitAnchor: boolean
-  enterSplit: (anchor: string | null) => void
+  enterSplit: (anchor: string | null, dir?: SplitDir) => void
   /** The session menu's "New chat here" item (ChatPage builds it from the current folder). */
   mobileNewSessionItem: ComponentProps<typeof ChatHeaderMenu>['newSessionHere']
   dispatch: AppDispatch
@@ -239,9 +241,14 @@ export default function MobileTopBar({
               <span className="flex items-center gap-2"><Columns2 size={14} className="shrink-0 text-muted" /><span>{i18nT('pages.chatPage.return_to_split_view')}</span></span>
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem className="[@media(hover:none)]:min-h-10" onSelect={() => enterSplit(activeSlot)}>
-              <span className="flex items-center gap-2"><Columns2 size={14} className="shrink-0 text-muted" /><span>{i18nT('pages.chatPage.enter_split_view')}</span></span>
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem className="[@media(hover:none)]:min-h-10" onSelect={() => enterSplit(activeSlot, 'right')}>
+                <span className="flex items-center gap-2"><Columns2 size={14} className="shrink-0 text-muted" /><span>{i18nT('pages.chatPage.enter_split_view')}</span></span>
+              </DropdownMenuItem>
+              <DropdownMenuItem className="[@media(hover:none)]:min-h-10" onSelect={() => enterSplit(activeSlot, 'down')}>
+                <span className="flex items-center gap-2"><SplitGlyph down /><span>{i18nT('components.chatPane.split_down')}</span></span>
+              </DropdownMenuItem>
+            </>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>

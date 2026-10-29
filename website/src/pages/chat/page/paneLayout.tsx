@@ -8,6 +8,7 @@ import { notePanelShown } from '../../../hooks/usePanelTabs'
 import type { useChatPageResourcesController } from '../useChatPageResourcesController'
 import type { useComposerChips } from './composerChips'
 import type { MemoryMode } from '../../../components/MemoryModeChip'
+import type { SplitDir } from '../../../hooks/useSessionGrid'
 import { anchorForSlot, sessionSlots, loadLayout } from '../../../hooks/splitLayoutStore'
 import { CHAT_PANE_MIN_W, sidePanelFillWidth } from '../SidePanel'
 import { useSidePanelDock } from '../../../hooks/useSidePanelDock'
@@ -152,9 +153,10 @@ export function usePaneLayoutState({
   // chat plus an "in split" badge that re-enters it (β model). `splitAnchor` is the
   // slot whose split we're showing (the one ⌘D'd from, or the badge's target).
   // enterSplit opens Split View for `anchor`: SessionGridView restores anchor's saved
-  // layout if one exists, else seeds [anchor | placeholder]. Closing back down to a
-  // single session dissolves the layout and collapses to native chat (onCollapse).
-  const enterSplit = useCallback((anchor: string | null) => { setSplitAnchor(anchor); setSplitMode(true) }, [setSplitAnchor, setSplitMode])
+  // layout if one exists, else seeds [anchor | placeholder] along `dir`. Closing back
+  // down to a single session dissolves the layout and collapses to native chat (onCollapse).
+  const [splitDir, setSplitDir] = useState<SplitDir>('right')
+  const enterSplit = useCallback((anchor: string | null, dir: SplitDir = 'right') => { setSplitAnchor(anchor); setSplitDir(dir); setSplitMode(true) }, [setSplitAnchor, setSplitMode])
   // Anchor of the persisted split the active session belongs to (>= 2 live sessions),
   // or null — drives the "in split" badge in single chat. Validated against live
   // slots so a stale layout (a member was deleted) never shows a dead badge.
@@ -194,7 +196,7 @@ export function usePaneLayoutState({
   }, [embedMode, splitMode, enterSplit, splitFeatureEnabled, activeSlot])
   return {
     sidebarPinned, setSidebarPinned, sidebarPinnedRef, sidebarAutoHidden, sidePanelDock, sidePanelDockAnim, sidebarWidth, setSidebarWidth, sidebarDragging, setSidebarDragging, setEditingTitleSlot,
-    editingTitle, enterSplit, splitAnchorForActive, activeIsSplitAnchor,
+    editingTitle, enterSplit, splitDir, splitAnchorForActive, activeIsSplitAnchor,
   }
 }
 
